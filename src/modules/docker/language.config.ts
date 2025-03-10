@@ -18,10 +18,11 @@ abstract class BaseLanguageConfig {
 // python
 class PythonConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
+    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'python:latest',
-      cmd: ['python', '-c', this.code],
+      cmd: ['python', '-c', escapedCode],
     };
   }
 }
@@ -29,10 +30,11 @@ class PythonConfig extends BaseLanguageConfig {
 // javascript
 class JavascriptConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
+    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'node:slim',
-      cmd: ['node', '-e', this.code],
+      cmd: ['node', '-e', escapedCode],
     };
   }
 }
@@ -40,13 +42,15 @@ class JavascriptConfig extends BaseLanguageConfig {
 // clang
 class CConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
+    // 转义代码字符串中的双引号
+    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'gcc:latest',
       cmd: [
         'sh',
         '-c',
-        `echo "${this.code}" > main.c && gcc main.c -o main && ./main`,
+        `echo "${escapedCode}" > main.c && gcc main.c -o main && ./main`,
       ],
     };
   }
@@ -55,13 +59,15 @@ class CConfig extends BaseLanguageConfig {
 // c++
 class CppConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
+    // 转义代码字符串中的双引号
+    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'gcc:latest',
       cmd: [
         'sh',
         '-c',
-        `echo "${this.code}" > main.cpp && g++ main.c -o main && ./main`,
+        `echo "${escapedCode}" > main.cpp && g++ main.cpp -o main && ./main`,
       ],
     };
   }
@@ -70,13 +76,14 @@ class CppConfig extends BaseLanguageConfig {
 // java
 class JavaConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
+    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'openjdk:25-jdk',
       cmd: [
         'sh',
         '-c',
-        `echo "${this.code}" > Main.java && javac Main.java && java Main`,
+        `echo "${escapedCode}" > Main.java && javac Main.java && java Main`,
       ],
     };
   }
@@ -88,7 +95,11 @@ class RustConfig extends BaseLanguageConfig {
     return {
       ...this.baseConfig,
       image: 'rust:latest',
-      cmd: [`sh -c "echo ${this.code} > main.rs && rustc main.rs" `],
+      cmd: [
+        'sh',
+        '-c',
+        `echo '${this.code}' > main.rs && rustc main.rs && ./main `,
+      ],
     };
   }
 }

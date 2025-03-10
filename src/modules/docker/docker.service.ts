@@ -24,6 +24,17 @@ export class DockerService {
     cmd: string[],
     timeout: number,
   ): Promise<{ output: string; error: string }> {
+    // 检查镜像是否存在
+    const images = await this.docker.listImages();
+    const imageExists = images.some((img) => img.RepoTags?.includes(image));
+
+    if (!imageExists) {
+      return {
+        output: '',
+        error: 'Docker image not found',
+      };
+    }
+
     const container = await this.docker.createContainer({
       Image: image,
       Cmd: cmd,
@@ -85,7 +96,7 @@ export class DockerService {
 
   getLanguageConfig(code: string, language: string): LanguageConfig {
     if (!(language in SupportedLanguages)) {
-      throw new TypeError('Unsupported code');
+      throw new TypeError('Unsupported language');
     }
 
     const ConfigClass = languageConfigMap[language] as LanguageConfigClass; //获取类
