@@ -98,7 +98,12 @@ class RustConfig extends BaseLanguageConfig {
       cmd: [
         'sh',
         '-c',
-        `echo '${this.code}' > main.rs && rustc main.rs && ./main `,
+        `echo '${this.code}' > main.rs &&` +
+          'rustc main.rs &&' +
+          'start_time=$(date +%s%N); ' +
+          './main; ' +
+          'end_time=$(date +%s%N); ' +
+          'echo $((end_time - start_time))',
       ],
     };
   }
