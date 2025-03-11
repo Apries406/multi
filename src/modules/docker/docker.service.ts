@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as Docker from 'dockerode';
-import { filterControlCharacters } from 'src/utils/string';
+import { formatExportLogs } from 'src/utils/string';
 import {
   LanguageConfig,
   LanguageConfigClass,
@@ -23,7 +23,7 @@ export class DockerService {
     image: string,
     cmd: string[],
     timeout: number,
-  ): Promise<{ output: string; error: string }> {
+  ): Promise<{ output: string; error: string; executeTime?: number }> {
     // 检查镜像是否存在
     const images = await this.docker.listImages();
     const imageExists = images.some((img) => img.RepoTags?.includes(image));
@@ -83,7 +83,7 @@ export class DockerService {
       await container.remove();
 
       return {
-        output: filterControlCharacters(logs.toString().trim()),
+        ...formatExportLogs(logs.toString()),
         error: '',
       };
     } catch (error) {

@@ -18,11 +18,17 @@ abstract class BaseLanguageConfig {
 // python
 class PythonConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
-    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'python:latest',
-      cmd: ['python', '-c', escapedCode],
+      cmd: [
+        'sh',
+        '-c',
+        'start_time=$(date +%s%N); ' +
+          `python -c "${this.code}"; ` +
+          'end_time=$(date +%s%N); ' +
+          'echo {--$((end_time - start_time))--}',
+      ],
     };
   }
 }
@@ -34,7 +40,14 @@ class JavascriptConfig extends BaseLanguageConfig {
     return {
       ...this.baseConfig,
       image: 'node:slim',
-      cmd: ['node', '-e', escapedCode],
+      cmd: [
+        'sh',
+        '-c',
+        'start_time=$(date +%s%N); ' +
+          `node -e "${escapedCode}"; ` +
+          'end_time=$(date +%s%N); ' +
+          'echo {--$((end_time - start_time))--}',
+      ],
     };
   }
 }
@@ -42,15 +55,18 @@ class JavascriptConfig extends BaseLanguageConfig {
 // clang
 class CConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
-    // 转义代码字符串中的双引号
-    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'gcc:latest',
       cmd: [
         'sh',
         '-c',
-        `echo "${escapedCode}" > main.c && gcc main.c -o main && ./main`,
+        `echo "${this.code}" > main.c &&` +
+          'g++ main.c -o main &&' +
+          'start_time=$(date +%s%N); ' +
+          './main;' +
+          'end_time=$(date +%s%N); ' +
+          'echo {--$((end_time - start_time))--}',
       ],
     };
   }
@@ -60,14 +76,18 @@ class CConfig extends BaseLanguageConfig {
 class CppConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
     // 转义代码字符串中的双引号
-    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'gcc:latest',
       cmd: [
         'sh',
         '-c',
-        `echo "${escapedCode}" > main.cpp && g++ main.cpp -o main && ./main`,
+        `echo "${this.code}" > main.cpp &&` +
+          'g++ main.cpp -o main &&' +
+          'start_time=$(date +%s%N); ' +
+          './main;' +
+          'end_time=$(date +%s%N); ' +
+          'echo {--$((end_time - start_time))--}',
       ],
     };
   }
@@ -76,14 +96,18 @@ class CppConfig extends BaseLanguageConfig {
 // java
 class JavaConfig extends BaseLanguageConfig {
   getConfig(): LanguageConfig {
-    const escapedCode = this.code.replace(/"/g, '\\"');
     return {
       ...this.baseConfig,
       image: 'openjdk:25-jdk',
       cmd: [
         'sh',
         '-c',
-        `echo "${escapedCode}" > Main.java && javac Main.java && java Main`,
+        `echo "${this.code}" > Main.java && ` +
+          'javac Main.java && ' +
+          'start_time=$(date +%s%N); ' +
+          'java Main; ' +
+          'end_time=$(date +%s%N); ' +
+          'echo {--$((end_time - start_time))--}',
       ],
     };
   }
@@ -103,7 +127,7 @@ class RustConfig extends BaseLanguageConfig {
           'start_time=$(date +%s%N); ' +
           './main; ' +
           'end_time=$(date +%s%N); ' +
-          'echo $((end_time - start_time))',
+          'echo {--$((end_time - start_time))--}',
       ],
     };
   }
