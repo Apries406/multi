@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as Docker from 'dockerode';
 import { formatExportLogs } from 'src/utils/string';
 import {
@@ -9,6 +9,7 @@ import {
 } from './language.config';
 @Injectable()
 export class DockerService {
+  private readonly logger: Logger = new Logger('DockerService');
   private readonly docker: Docker;
 
   constructor() {
@@ -47,34 +48,17 @@ export class DockerService {
 
     await container.start();
 
-    const containerWaitPromise = container.wait();
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        void (async () => {
-          try {
-            await container.stop();
-            await container.remove();
-            reject(new Error('Execution Timeout'));
-          } catch (err) {
-            if (err instanceof Error) {
-              reject(err);
-            } else {
-              // 如果 err 不是 Error 类型，创建一个新的 Error 实例
-              reject(new Error(`Unexpected error: ${JSON.stringify(err)}`));
-            }
-          }
+        void (() => {
+          reject(new Error('Execution Timeout'));
         })();
       }, timeout);
     });
 
     try {
       await Promise.race([container.wait(), timeoutPromise]);
-      // 检查是否超时
-      if (
-        Promise.race([containerWaitPromise, timeoutPromise]) === timeoutPromise
-      ) {
-        throw new Error('Execution Timeout');
-      }
+
       const logs = await container.logs({
         stdout: true,
         stderr: true,
@@ -91,6 +75,17 @@ export class DockerService {
         output: '',
         error: (error as Error).message || 'Unknown Error',
       };
+    } finally {
+      try {
+        await container.stop();
+      } catch (err) {
+        this.logger.error(err);
+      }
+      try {
+        await container.remove();
+      } catch (err) {
+        this.logger.error(err);
+      }
     }
   }
 

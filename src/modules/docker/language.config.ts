@@ -43,8 +43,9 @@ class JavascriptConfig extends BaseLanguageConfig {
       cmd: [
         'sh',
         '-c',
-        'start_time=$(date +%s%N); ' +
-          `node -e "${escapedCode}"; ` +
+        `echo "${escapedCode}" > main.js && ` +
+          'start_time=$(date +%s%N); ' +
+          'node main.js; ' +
           'end_time=$(date +%s%N); ' +
           'echo {--$((end_time - start_time))--}',
       ],
