@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as Docker from 'dockerode';
-import { formatExportLogs } from 'src/utils/string';
+import { formatExportLogs } from '../../utils/string';
 import {
   LanguageConfig,
   LanguageConfigClass,
