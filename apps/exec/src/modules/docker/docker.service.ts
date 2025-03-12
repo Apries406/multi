@@ -90,7 +90,7 @@ export class DockerService {
   }
 
   getLanguageConfig(code: string, language: string): LanguageConfig {
-    if (!(language in SupportedLanguages)) {
+    if (!(language.toLocaleLowerCase() in SupportedLanguages)) {
       throw new TypeError('Unsupported language');
     }
 

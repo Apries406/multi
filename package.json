@@ -26,6 +26,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@types/dockerode": "^3.3.35",
     "dockerode": "^4.0.4",
+    "multi": "link:",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

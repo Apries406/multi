@@ -26,7 +26,7 @@ importers:
       dockerode:
         specifier: ^4.0.4
         version: 4.0.4
-      exec:
+      multi:
         specifier: 'link:'
         version: 'link:'
       reflect-metadata:
