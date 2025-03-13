@@ -5,7 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/exec/tsconfig.app.json"
+    "tsConfigPath": "apps/exec/tsconfig.app.json",
+    "assets": ["**/*.proto", ".env"],
+    "watchAssets": true
   },
   "monorepo": true,
   "root": "apps/exec",
@@ -26,6 +28,24 @@
       "sourceRoot": "apps/exec/src",
       "compilerOptions": {
         "tsConfigPath": "apps/exec/tsconfig.app.json"
+      }
+    },
+    "lectech": {
+      "type": "application",
+      "root": "apps/lectech",
+      "entryFile": "main",
+      "sourceRoot": "apps/lectech/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/lectech/tsconfig.app.json"
+      }
+    },
+    "oj": {
+      "type": "application",
+      "root": "apps/oj",
+      "entryFile": "main",
+      "sourceRoot": "apps/oj/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/oj/tsconfig.app.json"
       }
     }
   }
