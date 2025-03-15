@@ -9,11 +9,13 @@ import { join } from 'path';
 import { TeamModule } from './modules/team/team.module';
 import { User } from './modules/user/entities/user.entity';
 import { Team } from './modules/team/entities/team.entity';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     UserModule,
     AuthModule,
+    TeamModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: join(__dirname, '../auth/.env'),
@@ -22,7 +24,7 @@ import { Team } from './modules/team/entities/team.entity';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get<string>('DB_HOST'),
+        host: configService.get('DB_HOST'),
         port: configService.get('DB_PORT'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
@@ -31,9 +33,19 @@ import { Team } from './modules/team/entities/team.entity';
         poolSize: 10,
         connectorPackage: 'mysql2',
         entities: [User, Team],
+        logging: true,
       }),
     }),
-    TeamModule,
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        global: true,
+        secret: configService.get('JWT_SECRETE'),
+        signOptions: {
+          expiresIn: configService.get('JWT_EXPIRATION'),
+        },
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

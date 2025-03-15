@@ -9,6 +9,7 @@ export class ExecuteController {
   @Post('/')
   @HttpCode(200)
   executeCode(@Body() dto: ExecuteCodeDto) {
+    console.log(dto);
     return this.executeService.executeCode(dto.code, dto.language);
   }
 }

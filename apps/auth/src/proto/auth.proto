@@ -19,7 +19,11 @@ message RegisterRequest {
   string email = 1;
   string password = 2;
   string student_id = 3;
+  string nickname = 4;
+  optional string name = 5;
 }
 
 
-message RegisterResponse {}
+message RegisterResponse {
+  string nickname = 1;
+}
