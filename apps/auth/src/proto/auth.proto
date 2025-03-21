@@ -2,19 +2,36 @@ syntax = "proto3";
 
 package auth;
 
-service AuthService {
-  rpc Register(RegisterRequest) returns (RegisterResponse){}
+// 错误响应
+message ErrorResponse {
+  string code = 1;
+  string message = 2;
+  map<string, string> details = 3;
 }
 
-/*
-export interface RegisterUserDTO {
-  email: string;
-  password: string;
-  studentId: string;
-  name?: string;
-  nickname: string;
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse){}
+  rpc Login(LoginRequest) returns (LoginResponse){}
+  rpc RefreshTokens(RefreshTokensRequest) returns (RefreshTokensResponse){}
 }
-*/
+
+message TeamInfo {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message RegisterUser {
+  string id = 1;
+  string email = 2;
+  string studentId = 3;
+  string name = 4;
+  string nickname = 5;
+  string grade = 6;
+  string role = 7;
+  TeamInfo team = 8;
+}
+
 message RegisterRequest {
   string email = 1;
   string password = 2;
@@ -23,7 +40,25 @@ message RegisterRequest {
   optional string name = 5;
 }
 
-
 message RegisterResponse {
-  string nickname = 1;
+  optional RegisterUser user = 1;
+  optional ErrorResponse error = 2;
+}
+
+message LoginRequest {
+  string studentId = 1;
+  string password = 2;
+}
+message LoginResponse {
+  optional RegisterUser user = 1;
+  optional ErrorResponse error = 2;
+}
+
+message RefreshTokensRequest {
+  string refresh_token = 1;
+}
+message RefreshTokensResponse {
+  optional string refresh_token = 1;
+  optional string access_token = 2;
+  optional ErrorResponse error = 3;
 }

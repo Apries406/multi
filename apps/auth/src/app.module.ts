@@ -10,6 +10,8 @@ import { TeamModule } from './modules/team/team.module';
 import { User } from './modules/user/entities/user.entity';
 import { Team } from './modules/team/entities/team.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GrpcErrorInterceptor } from './interceptors/grpc-error.interceptor';
 
 @Module({
   imports: [
@@ -48,6 +50,12 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GrpcErrorInterceptor,
+    },
+  ],
 })
 export class AppModule {}

@@ -1,10 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { RpcException } from '@nestjs/microservices';
+import { createGRPCErrorResponse } from '../../libs/response.lib';
 
 @Injectable()
 export class UserService {
+  private logger = new Logger('UserService');
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -25,10 +29,15 @@ export class UserService {
     ]);
 
     if (existingEmail) {
-      throw new ConflictException('Email already exists');
+      throw new RpcException(
+        createGRPCErrorResponse('EMAIL_ALREADY_EXISTS', '邮箱已存在'),
+      );
     }
+
     if (existingStudentId) {
-      throw new ConflictException('Student ID already exists');
+      throw new RpcException(
+        createGRPCErrorResponse('STUDENT_ID_ALREADY_EXISTS', '学号已存在'),
+      );
     }
 
     return this.userRepository.save(user);

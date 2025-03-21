@@ -10,7 +10,7 @@ export class AuthController {
 
   @GrpcMethod('AuthService', 'Register')
   async register(dto: RegisterUserDTO) {
-    return await this.authService.create(dto);
+    return this.authService.create(dto);
   }
 
   @GrpcMethod('AuthService', 'Login')

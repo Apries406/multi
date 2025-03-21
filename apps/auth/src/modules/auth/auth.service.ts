@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { RegisterUserDTO } from '../user/dto/register-user.dto';
 import { User } from '../user/entities/user.entity';
@@ -9,6 +9,8 @@ import {
 } from '../../utils/encode';
 import { LoginUserDTO } from '../user/dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { createGRPCErrorResponse } from '../../libs/response.lib';
+import { RpcException } from '@nestjs/microservices';
 
 // 定义一个通用的 TokenPayload 接口，type 为联合类型
 interface TokenPayload {
@@ -27,6 +29,22 @@ interface AccessTokenPayload extends TokenPayload {
   type: 'access';
   role: string;
 }
+
+type SafeUserInfo = Omit<User, 'password' | 'salt' | 'updateAt' | 'createAt'>;
+
+function generateSafeUser(user: User): SafeUserInfo {
+  return {
+    id: user.id,
+    email: user.email,
+    studentId: user.studentId,
+    name: user.name,
+    nickname: user.nickname,
+    grade: user.grade,
+    role: user.role,
+    team: user.team,
+  };
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,25 +53,19 @@ export class AuthService {
   ) {}
 
   async create(dto: RegisterUserDTO) {
-    try {
-      const user = new User();
-      const salt = generateSalt();
-      Object.assign(user, dto, {
-        password: encodePassword(dto.password, salt),
-        salt,
-        studentId: dto.studentId,
-        grade: dto.studentId.slice(0, 4),
-      });
+    const user = new User();
+    const user_salt = generateSalt();
+    Object.assign(user, dto, {
+      password: encodePassword(dto.password, user_salt),
+      salt: user_salt,
+      studentId: dto.studentId,
+      grade: dto.studentId.slice(0, 4),
+    });
 
-      await this.userService.create(user);
+    await this.userService.create(user);
 
-      const { password, ...rest } = user;
-
-      const tokens = this.generateTokens(rest);
-      return { ...tokens, user: rest };
-    } catch {
-      throw new UnauthorizedException('Registration Failed');
-    }
+    const tokens = this.generateTokens(user);
+    return { ...tokens, user: generateSafeUser(user) };
   }
 
   async validateUser(dto: LoginUserDTO) {
@@ -68,7 +80,7 @@ export class AuthService {
     return null;
   }
 
-  private generateTokens(user: Omit<User, 'password'>) {
+  private generateTokens(user: User) {
     const accessTokenPayload: AccessTokenPayload = {
       studentId: user.studentId,
       sub: user.id,
@@ -84,47 +96,47 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(accessTokenPayload, {
-        expiresIn: '30m',
+        expiresIn: '7d',
       }),
       refresh_token: this.jwtService.sign(refreshTokenPayload, {
-        expiresIn: '7d',
+        expiresIn: '30m',
       }),
     };
   }
 
   async refreshTokens(refreshToken: string) {
-    try {
-      const payload: RefreshTokenPayload = this.jwtService.verify(refreshToken);
+    const payload: RefreshTokenPayload = this.jwtService.verify(refreshToken);
 
-      if (payload.type !== 'refresh') {
-        throw new UnauthorizedException('Invalid Token Type');
-      }
-
-      const user = await this.userService.findOneByStudentId(payload.studentId);
-
-      if (!user) {
-        throw new UnauthorizedException('User Not Found');
-      }
-
-      const { password, ...userInfo } = user;
-      const tokens = this.generateTokens(userInfo);
-
-      return {
-        ...tokens,
-        user: userInfo,
-      };
-    } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
+    if (payload.type !== 'refresh') {
+      throw new RpcException(
+        createGRPCErrorResponse('INVALID_TOKEN_TYPE', '验证令牌不合法'),
+      );
     }
+
+    const user = await this.userService.findOneByStudentId(payload.studentId);
+
+    if (!user) {
+      throw new RpcException(
+        createGRPCErrorResponse('USER_NOT_FOUND', '用户不存在'),
+      );
+    }
+
+    const tokens = this.generateTokens(user);
+
+    return {
+      ...tokens,
+    };
   }
 
   async login(dto: LoginUserDTO) {
     const user = await this.validateUser(dto);
     if (!user) {
-      throw new UnauthorizedException('Invalid Credentials');
+      throw new RpcException(
+        createGRPCErrorResponse('INVALID_TOKEN_TYPE', '验证令牌不合法'),
+      );
     }
 
-    const tokens = this.generateTokens(user);
+    const tokens = this.generateTokens(user as User);
 
     return {
       ...tokens,
