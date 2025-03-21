@@ -62,3 +62,42 @@ message RefreshTokensResponse {
   optional string access_token = 2;
   optional ErrorResponse error = 3;
 }
+
+
+service TeamService {
+  rpc CreateTeam (CreateTeamRequest) returns (CreateTeamResponse) {};
+  rpc GetTeams () returns (GetTeamsResponse) {};
+  rpc GetTeam (GetTeamRequest) returns (GetTeamResponse) {}; 
+  rpc UpdateTeam (UpdateTeamRequest) returns (UpdateTeamResponse) {}; 
+  rpc DeleteTeam (DeleteTeamRequest) returns (DeleteTeamResponse) {};  
+  rpc AddTeamMembers (AddTeamMembersRequest) returns(AddTeamMembersResponse) {};  
+  rpc RemoveTeamMember (RemoveTeamMemberRequest) returns (RemoveTeamMemberResponse) {};  
+  rpc MoveUserToAnotherTeam (MoveUserToAnotherTeamRequest) returns (MoveUserToAnotherTeamResponse) {};
+  rpc TransferTeamOwnerShip (TransferTeamOwnerShipRequest) returns (TransferTeamOwnerShipResponse) {}
+}
+
+message CreateTeamRequest {}
+message CreateTeamResponse {}
+
+message GetTeamsResponse {}
+
+message GetTeamRequest {}
+message GetTeamResponse {}
+
+message UpdateTeamRequest{}
+message UpdateTeamResponse{}
+
+message DeleteTeamRequest {}
+message DeleteTeamResponse {}
+
+message AddTeamMembersRequest {}
+message AddTeamMembersResponse {}
+
+message RemoveTeamMemberRequest {}
+message RemoveTeamMemberResponse {}
+
+message MoveUserToAnotherTeamRequest {}
+message MoveUserToAnotherTeamResponse {}
+
+message TransferTeamOwnerShipRequest {}
+message TransferTeamOwnerShipResponse {}
