@@ -66,19 +66,20 @@ message RefreshTokensResponse {
 
 service TeamService {
   rpc CreateTeam (CreateTeamRequest) returns (CreateTeamResponse) {};
-  rpc GetTeams () returns (GetTeamsResponse) {};
+  rpc GetTeams (GetTeamsRequest) returns (GetTeamsResponse) {};
   rpc GetTeam (GetTeamRequest) returns (GetTeamResponse) {}; 
   rpc UpdateTeam (UpdateTeamRequest) returns (UpdateTeamResponse) {}; 
   rpc DeleteTeam (DeleteTeamRequest) returns (DeleteTeamResponse) {};  
   rpc AddTeamMembers (AddTeamMembersRequest) returns(AddTeamMembersResponse) {};  
   rpc RemoveTeamMember (RemoveTeamMemberRequest) returns (RemoveTeamMemberResponse) {};  
   rpc MoveUserToAnotherTeam (MoveUserToAnotherTeamRequest) returns (MoveUserToAnotherTeamResponse) {};
-  rpc TransferTeamOwnerShip (TransferTeamOwnerShipRequest) returns (TransferTeamOwnerShipResponse) {}
+  rpc TransferTeamOwnerShip (TransferTeamOwnerShipRequest) returns (TransferTeamOwnerShipResponse) {};
 }
 
 message CreateTeamRequest {}
 message CreateTeamResponse {}
 
+message GetTeamsRequest {}
 message GetTeamsResponse {}
 
 message GetTeamRequest {}
